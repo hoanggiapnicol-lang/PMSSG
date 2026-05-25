@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>So sánh nhà cung cấp</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <aside class="sidebar">
+      <section class="panel request-panel">
+        <div class="brand-block">
+          <div class="brand-icon">S</div>
+          <div>
+            <h1>So sánh nhà cung cấp</h1>
+            <p>Chấm điểm theo giá, chất lượng, uy tín và điều kiện giao hàng.</p>
+          </div>
+        </div>
+        <div class="section-title compact-title">
+          <h2>Thông tin sản phẩm</h2>
+          <span id="currentId" class="pill">Chưa lưu</span>
+        </div>
+      <form id="requestForm" class="grid-form">
+        <label>
+          Tên sản phẩm
+          <input name="product_name" required list="productSuggestions" placeholder="Ví dụ: máy bơm nước công nghiệp">
+        </label>
+        <label>
+          Model/mã hàng
+          <input name="model" list="modelSuggestions" placeholder="Ví dụ: ABC-220V">
+        </label>
+        <label class="span-2">
+          Thông số kỹ thuật
+          <textarea name="specifications" rows="3" placeholder="Công suất, vật liệu, kích thước, tiêu chuẩn..."></textarea>
+        </label>
+        <label>
+          Số lượng cần mua
+          <input name="required_quantity" type="number" min="1" step="1" value="1">
+        </label>
+        <label>
+          Đơn vị tính
+          <input name="unit" placeholder="cái, bộ, kg...">
+        </label>
+        <label class="span-2">
+          Kho nhận hàng
+          <input name="delivery_warehouse" list="warehouseSuggestions" placeholder="Địa chỉ kho bên mua">
+        </label>
+        <label>
+          Tỷ giá USD
+          <input name="usd_rate" type="number" min="0" step="1" value="25500">
+        </label>
+        <label>
+          Tỷ giá CNY
+          <input name="cny_rate" type="number" min="0" step="1" value="4000">
+        </label>
+        <label>
+          Phụ phí %
+          <input name="extra_fee_percent" type="number" min="0" step="0.1" value="0">
+        </label>
+        <label>
+          Phụ phí VND
+          <input name="extra_fee_vnd" type="number" min="0" step="1000" value="0">
+        </label>
+        <label class="span-2">
+          Mức ưu tiên
+          <select name="priority">
+            <option value="balanced">Cân bằng</option>
+            <option value="price">Ưu tiên giá rẻ</option>
+            <option value="reputation">Ưu tiên uy tín</option>
+            <option value="delivery">Ưu tiên giao nhanh</option>
+          </select>
+        </label>
+        <label>
+          Ảnh sản phẩm
+          <input id="imageInput" type="file" accept="image/*,.pdf,.xls,.xlsx,.csv,.tsv">
+        </label>
+        <label class="span-2">
+          Ghi chú
+          <textarea name="notes" rows="2"></textarea>
+        </label>
+        <input type="hidden" name="image_path">
+      </form>
+      <div class="image-preview-wrap">
+        <div id="imagePreview" class="image-preview empty">Chưa có hình ảnh</div>
+        <button id="clearImageBtn" type="button" class="clear-image hidden" title="Xóa ảnh/file đã chọn">×</button>
+      </div>
+      <div id="productExtractStatus" class="extract-status muted">Có thể tải ảnh chụp, PDF hoặc Excel để app tự điền thông tin.</div>
+        <div class="sidebar-actions">
+          <div class="platform-picker" aria-label="Chọn sàn lấy dữ liệu">
+            <label><input type="checkbox" data-platform="Shopee" checked> Shopee</label>
+            <label><input type="checkbox" data-platform="Taobao" checked> Taobao</label>
+            <label><input type="checkbox" data-platform="Tiki" checked> Tiki</label>
+            <label><input type="checkbox" data-platform="1688" checked> 1688</label>
+          </div>
+          <button id="scoreBtn" type="button" class="primary full-width">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="button-label">Tìm và xếp hạng</span>
+          </button>
+          <button id="fetchBtn" type="button" class="full-width">
+            <span class="spinner" aria-hidden="true"></span>
+            <span class="button-label">Lấy dữ liệu công khai</span>
+          </button>
+          <div class="button-row">
+            <button id="newRequestBtn" type="button">Tạo mới</button>
+            <button id="saveBtn" type="button">Lưu</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel weights-panel">
+        <div class="section-title">
+          <div>
+            <h2>Trọng số điểm</h2>
+            <p id="weightStatus" class="muted">Tổng phải bằng 100.</p>
+          </div>
+        </div>
+        <div class="weights-grid">
+          <label>Giá <input data-weight="price" type="number" min="0" step="1"></label>
+          <label>Chất lượng <input data-weight="quality" type="number" min="0" step="1"></label>
+          <label>Uy tín <input data-weight="reputation" type="number" min="0" step="1"></label>
+          <label>Giao hàng <input data-weight="delivery" type="number" min="0" step="1"></label>
+          <label>Số lượng <input data-weight="quantity" type="number" min="0" step="1"></label>
+          <label>Giao kho <input data-weight="warehouseDelivery" type="number" min="0" step="1"></label>
+          <label>Bảo hành <input data-weight="warranty" type="number" min="0" step="1"></label>
+        </div>
+        <div class="button-row">
+          <button id="saveWeightsBtn" type="button">Lưu trọng số</button>
+          <button id="resetWeightsBtn" type="button">Mặc định</button>
+        </div>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="section-title">
+          <h2>Lịch sử</h2>
+          <button id="refreshHistoryBtn" type="button">Tải lại</button>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </aside>
+
+    <section class="workspace">
+      <section class="panel results-panel">
+        <div class="section-title">
+          <div>
+            <h2>Top 5 nhà cung cấp</h2>
+            <p id="statusText" class="muted">Chưa tính điểm</p>
+          </div>
+          <button id="exportBtn" type="button" class="primary">Xuất Excel</button>
+        </div>
+        <div id="noticeBar" class="notice-bar" aria-live="polite"></div>
+        <div class="table-wrap compact">
+          <table id="resultsTable">
+            <thead>
+              <tr>
+                <th>Hạng</th>
+                <th>Nhà cung cấp</th>
+                <th>Nguồn</th>
+                <th>Điểm cuối</th>
+                <th>Điểm nền</th>
+                <th>Trừ rủi ro</th>
+                <th>Mức rủi ro</th>
+                <th>Quyết định</th>
+                <th>Tổng về kho</th>
+                <th>Giá</th>
+                <th>Chất lượng</th>
+                <th>Điểm uy tín</th>
+                <th>Điểm GH</th>
+                <th>Số lượng</th>
+                <th>Giao kho</th>
+                <th>Điểm BH</th>
+                <th>Thời gian giao</th>
+                <th>Uy tín</th>
+                <th>Bảo hành</th>
+                <th>Rủi ro</th>
+                <th>Link</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="topFive" class="top-five"></div>
+      </section>
+
+      <section class="panel suppliers-panel">
+        <div class="section-title">
+          <div>
+            <h2>Danh sách báo giá</h2>
+            <p class="muted">Nhập tay hoặc import báo giá, sau đó bấm Tìm và xếp hạng.</p>
+          </div>
+          <div class="inline-actions">
+            <input id="importInput" type="file" accept=".csv,.tsv,.json,.xls,.xlsx,.txt">
+            <button id="addSupplierBtn" type="button">Thêm dòng</button>
+          </div>
+        </div>
+        <div id="importPreview" class="import-preview hidden" aria-live="polite">
+          <div class="section-title">
+            <div>
+              <h3>Preview import</h3>
+              <p id="importPreviewStatus" class="muted"></p>
+            </div>
+            <div class="inline-actions">
+              <button id="confirmImportBtn" type="button" class="primary">Nhập các dòng này</button>
+              <button id="cancelImportBtn" type="button">Hủy</button>
+            </div>
+          </div>
+          <div id="importWarnings" class="notice-bar"></div>
+          <div class="table-wrap compact">
+            <table id="importPreviewTable">
+              <thead>
+                <tr>
+                  <th>Nhà cung cấp</th>
+                  <th>Giá</th>
+                  <th>Ship</th>
+                  <th>Ngày giao</th>
+                  <th>Bảo hành</th>
+                  <th>Link</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="suppliersTable">
+            <thead>
+              <tr>
+                <th>Nhà cung cấp</th>
+                <th>Sàn</th>
+                <th>Giá</th>
+                <th>Tiền tệ</th>
+                <th>Phí ship</th>
+                <th>Ngày giao</th>
+                <th>Số lượng</th>
+                <th>Giao kho</th>
+                <th>Chất lượng</th>
+                <th>Uy tín</th>
+                <th>Bảo hành</th>
+                <th>Xác minh</th>
+                <th>Ghi chú xác minh</th>
+                <th>Link</th>
+                <th>Mở mua</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <template id="supplierRowTemplate">
+    <tr>
+      <td><input data-field="supplier_name" list="supplierSuggestions" placeholder="Tên NCC"></td>
+      <td><input data-field="source_platform" placeholder="Manual"></td>
+      <td><input data-field="unit_price" type="number" min="0" step="0.01"></td>
+      <td><input data-field="currency" placeholder="VND"></td>
+      <td><input data-field="shipping_fee" type="number" min="0" step="0.01"></td>
+      <td><input data-field="estimated_delivery_days" type="number" min="0" step="1"></td>
+      <td><input data-field="available_quantity" type="number" min="0" step="1"></td>
+      <td><input data-field="deliver_to_buyer_warehouse" type="checkbox"></td>
+      <td><input data-field="quality_raw" type="number" min="0" max="100" step="0.1"></td>
+      <td><input data-field="reputation_raw" type="number" min="0" max="100" step="0.1"></td>
+      <td><input data-field="warranty_policy" placeholder="12 tháng"></td>
+      <td>
+        <select data-field="verification_status">
+          <option value="unverified">Chưa xác minh</option>
+          <option value="source_checked">Đã kiểm nguồn</option>
+          <option value="sample_checked">Đã kiểm mẫu</option>
+          <option value="approved">Đã duyệt</option>
+          <option value="rejected">Loại bỏ</option>
+        </select>
+      </td>
+      <td><input data-field="verification_notes" placeholder="Đã hỏi bảo hành, ship..."></td>
+      <td><input data-field="product_url" placeholder="https://"></td>
+      <td><button type="button" data-action="open-link" class="link-button" title="Mở link mua hàng">Mở</button></td>
+      <td><button type="button" data-action="remove" class="icon-button" title="Xóa dòng">×</button></td>
+    </tr>
+  </template>
+
+  <datalist id="productSuggestions"></datalist>
+  <datalist id="modelSuggestions"></datalist>
+  <datalist id="warehouseSuggestions"></datalist>
+  <datalist id="supplierSuggestions"></datalist>
+
+  <script src="/app.js"></script>
+</body>
+</html>

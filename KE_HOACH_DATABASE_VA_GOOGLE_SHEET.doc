@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Kế hoạch vận hành database và Google Sheet cho App So Sánh Giá</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      color: #1f2933;
+      line-height: 1.55;
+      margin: 36px;
+    }
+
+    h1 {
+      color: #17623d;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      color: #1f3f52;
+      font-size: 18px;
+      margin-top: 26px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #d8e0e7;
+      padding-bottom: 4px;
+    }
+
+    p {
+      margin: 6px 0 12px;
+    }
+
+    ul, ol {
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+
+    li {
+      margin-bottom: 5px;
+    }
+
+    .note {
+      background: #edf8f1;
+      border: 1px solid #b9dfc8;
+      padding: 10px 12px;
+      margin: 14px 0;
+    }
+
+    code {
+      font-family: Consolas, monospace;
+      background: #f3f6f8;
+      padding: 1px 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Kế hoạch vận hành database và Google Sheet cho App So Sánh Giá</h1>
+
+  <p>
+    Tài liệu này lưu lại quyết định hiện tại và các việc cần làm sau để phát triển tính năng
+    Google Sheet export/import cho ứng dụng so sánh giá.
+  </p>
+
+  <div class="note">
+    <strong>Định hướng chính:</strong> App local là nơi làm việc chính. SQLite local là database chính.
+    Google Sheet sẽ được bổ sung trong tương lai để chia sẻ, nhập liệu phụ và backup dữ liệu.
+  </div>
+
+  <h2>1. Quyết định hiện tại</h2>
+  <ul>
+    <li>App local là nơi làm việc chính.</li>
+    <li>SQLite local là database chính.</li>
+    <li>Dữ liệu hiện nằm trong file <code>data/app.sqlite</code>.</li>
+    <li>Google Sheet chưa triển khai ngay ở giai đoạn này.</li>
+  </ul>
+
+  <h2>2. Quy trình vận hành hiện tại</h2>
+  <ol>
+    <li>Mở app local.</li>
+    <li>Tạo yêu cầu mua hàng mới.</li>
+    <li>Nhập thông tin sản phẩm: tên sản phẩm, model, thông số kỹ thuật, số lượng, kho nhận hàng và tỷ giá.</li>
+    <li>Nhập tay hoặc import báo giá nhà cung cấp.</li>
+    <li>Bấm tính điểm và xếp hạng để app tạo danh sách Top 5 nhà cung cấp.</li>
+    <li>Lưu dữ liệu vào SQLite local.</li>
+    <li>Export Excel khi cần gửi nội bộ hoặc lưu báo cáo.</li>
+  </ol>
+
+  <h2>3. Kế hoạch tương lai với Google Sheet</h2>
+  <ul>
+    <li>Google Sheet là nơi chia sẻ và nhập liệu phụ, không thay thế SQLite local.</li>
+    <li>Mỗi ngày hoặc sau mỗi thay đổi lớn sẽ export dữ liệu từ app lên Google Sheet.</li>
+    <li>Nếu team cập nhật báo giá trên Google Sheet, người dùng sẽ import lại dữ liệu vào app.</li>
+    <li>Sau khi import từ Google Sheet, cần bấm tính điểm lại để cập nhật Top 5 nhà cung cấp.</li>
+    <li>Google Sheet nên có các tab như <code>purchase_requests</code>, <code>suppliers</code>, <code>scores</code> và <code>app_settings</code>.</li>
+  </ul>
+
+  <h2>4. Backup dữ liệu</h2>
+  <ul>
+    <li>Backup file <code>data/app.sqlite</code> định kỳ.</li>
+    <li>Nên lưu thêm bản copy theo ngày, ví dụ <code>backup/app-2026-05-23.sqlite</code>.</li>
+    <li>Không xóa file <code>.sqlite</code>, <code>.sqlite-wal</code>, <code>.sqlite-shm</code> khi app đang chạy.</li>
+    <li>Nên tắt app trước khi copy database thủ công để giảm rủi ro file backup bị thiếu dữ liệu mới nhất.</li>
+  </ul>
+
+  <h2>5. Việc cần làm sau</h2>
+  <ul>
+    <li>Thêm tính năng Google Sheet export/import.</li>
+    <li>Thêm màn hình cấu hình <code>Spreadsheet ID</code>.</li>
+    <li>Thêm cấu hình Google Service Account để app có quyền đọc/ghi Google Sheet.</li>
+    <li>Thêm bước preview trước khi import dữ liệu từ Google Sheet vào SQLite.</li>
+    <li>Thêm backup SQLite tự động.</li>
+    <li>Thêm cảnh báo khi dữ liệu Google Sheet thiếu cột hoặc sai định dạng.</li>
+    <li>Đảm bảo sau import, app tự tính lại điểm để kết quả xếp hạng không bị lệch.</li>
+  </ul>
+
+  <h2>6. Ghi chú cho người dùng no-code</h2>
+  <ul>
+    <li>Không cần chỉnh trực tiếp file database nếu không thật sự cần thiết.</li>
+    <li>Không sửa tên tab hoặc tên cột trên Google Sheet khi tính năng này được triển khai.</li>
+    <li>Luôn kiểm tra dữ liệu preview trước khi import từ Google Sheet về app.</li>
+    <li>Nên giữ ít nhất một bản backup database trước khi import dữ liệu lớn.</li>
+  </ul>
+</body>
+</html>
