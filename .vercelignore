@@ -1,0 +1,15 @@
+node_modules
+dist
+exports
+logs
+data
+
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.traineddata
+*.log
+
+.git
+.gitignore
