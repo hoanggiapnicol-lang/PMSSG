@@ -335,7 +335,6 @@ if (require.main === module) {
   listen(PORT);
 }
 
-module.exports = {
-  handleRequest,
-  handleApi,
-};
+module.exports = handleRequest;
+module.exports.handleRequest = handleRequest;
+module.exports.handleApi = handleApi;
