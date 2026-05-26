@@ -13,10 +13,10 @@ const { extractProductInfo } = require('./src/product-extractor');
 const argPort = process.argv.find((arg) => arg.startsWith('--port='));
 const PORT = Number((argPort && argPort.split('=')[1]) || process.env.PORT || 5500);
 const PUBLIC_DIR = path.join(__dirname, 'public');
-const EXPORT_DIR = path.join(__dirname, 'exports');
+const EXPORT_DIR = process.env.VERCEL ? path.join('/tmp', 'supplier-comparison-exports') : path.join(__dirname, 'exports');
 const db = new AppDatabase();
 
-const server = http.createServer(async (req, res) => {
+async function handleRequest(req, res) {
   try {
     const url = new URL(req.url, `http://${req.headers.host}`);
     if (url.pathname.startsWith('/api/')) {
@@ -27,7 +27,9 @@ const server = http.createServer(async (req, res) => {
   } catch (error) {
     sendJson(res, 500, { error: error.message });
   }
-});
+}
+
+const server = http.createServer(handleRequest);
 
 async function handleApi(req, res, url) {
   if (req.method === 'GET' && url.pathname === '/api/health') {
@@ -329,4 +331,11 @@ function listen(port, attemptsLeft = 10) {
   });
 }
 
-listen(PORT);
+if (require.main === module) {
+  listen(PORT);
+}
+
+module.exports = {
+  handleRequest,
+  handleApi,
+};

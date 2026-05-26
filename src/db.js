@@ -1,18 +1,21 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { DatabaseSync } = require('node:sqlite');
 const { DEFAULT_WEIGHTS, normalizeWeights } = require('./scoring');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+const DATA_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'supplier-comparison-app')
+  : path.join(__dirname, '..', 'data');
 const DB_PATH = path.join(DATA_DIR, 'app.sqlite');
 
-function ensureDataDir() {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+function ensureDataDir(dbPath = DB_PATH) {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 }
 
 class AppDatabase {
   constructor(dbPath = DB_PATH) {
-    ensureDataDir();
+    ensureDataDir(dbPath);
     this.db = new DatabaseSync(dbPath);
     this.db.exec('PRAGMA journal_mode = WAL');
     this.db.exec('PRAGMA foreign_keys = ON');
