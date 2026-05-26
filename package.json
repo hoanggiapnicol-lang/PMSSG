@@ -2,11 +2,11 @@
   "name": "supplier-comparison-local-app",
   "version": "1.0.0",
   "description": "Local web app for comparing product quotes and ranking top suppliers.",
-  "main": "electron-main.js",
+  "main": "api/index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
-    "desktop": "electron .",
+    "desktop": "electron electron-main.js",
     "dist": "electron-builder",
     "test": "node --test \"tests\\*.test.js\""
   },
@@ -34,6 +34,9 @@
       "signingHashAlgorithms": []
     },
     "asar": false,
+    "extraMetadata": {
+      "main": "electron-main.js"
+    },
     "files": [
       "**/*"
     ]
