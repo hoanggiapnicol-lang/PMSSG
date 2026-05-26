@@ -1,6 +1,5 @@
 const XLSX = require('xlsx');
 const { PDFParse } = require('pdf-parse');
-const { createWorker } = require('tesseract.js');
 
 async function extractProductInfo({ filename = 'product-file', contentBase64 = '' } = {}) {
   if (!contentBase64) {
@@ -62,6 +61,10 @@ async function extractTextFromPdf(buffer) {
 }
 
 async function extractTextFromImage(buffer) {
+  if (process.env.VERCEL) {
+    throw new Error('OCR ảnh chưa hỗ trợ trên bản Vercel; vui lòng dùng PDF/Excel hoặc bản local để OCR ảnh.');
+  }
+  const { createWorker } = require('tesseract.js');
   let worker;
   try {
     worker = await createWorker('vie+eng');
