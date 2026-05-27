@@ -6,6 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
+    "dev": "node --watch server.js",
     "desktop": "electron electron-main.js",
     "dist": "electron-builder",
     "test": "node --test \"tests\\*.test.js\""
@@ -42,6 +43,9 @@
     ]
   },
   "dependencies": {
+    "axios": "^1.7.7",
+    "express": "^4.21.0",
+    "redis": "^4.7.0",
     "pdf-parse": "^2.4.5",
     "playwright-core": "^1.60.0",
     "tesseract.js": "^7.0.0",
